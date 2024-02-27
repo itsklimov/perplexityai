@@ -1,4 +1,5 @@
 from typing import Iterable, Dict
+from services.web_tools import gmail
 from os import listdir
 from uuid import uuid4
 from time import sleep, time
@@ -75,6 +76,7 @@ class Perplexity:
     def _recover_session(self, email: str) -> None:
         with open(".perplexity_session", "r") as f:
             perplexity_session: dict = loads(f.read())
+            print("Perplexity session recovered:", perplexity_session)
 
         if email in perplexity_session:
             self.session.cookies.update(perplexity_session[email])
@@ -85,8 +87,12 @@ class Perplexity:
         self.session.post(
             url="https://www.perplexity.ai/api/auth/signin-email", data={"email": email}
         )
-        email_link: str = str(input("paste the link you received by email: "))
 
+        sleep(3)
+
+        # try:
+        email_link: str = gmail.get_sign_in_url()
+        print("Email link received:", email_link)
         self.session.get(email_link)
 
         if ps:
@@ -260,7 +266,7 @@ class Perplexity:
         self._s(query, mode, search_focus, attachments, language, in_page, in_domain)
 
         start_time: float = time()
-        print("t and SID:", self.t, self.sid)
+        # print("t and SID:", self.t, self.sid)
         print("starting search", start_time)
         while (not self.finished) or len(self.queue) != 0:
             if timeout and time() - start_time > timeout:

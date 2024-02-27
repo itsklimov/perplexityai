@@ -134,6 +134,7 @@ class Perplexity:
 
     def _get_sid(self) -> str:
         url = f"https://www.perplexity.ai/socket.io/?EIO=4&transport=polling&t={self.t}"
+        print("Fetching sid from:", url)
         raw_response = self.fetch_raw_response(url)
         json_data = self.extract_json_from_response(raw_response)
         sid = self.get_sid_from_json(json_data)

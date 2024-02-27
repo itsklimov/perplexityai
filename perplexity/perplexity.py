@@ -8,6 +8,7 @@ from json import loads, dumps
 from random import getrandbits
 from websocket import WebSocketApp
 from requests import Session, get, post
+import requests
 
 
 class Perplexity:
@@ -119,10 +120,22 @@ class Perplexity:
         return format(getrandbits(32), "08x")
 
     def fetch_raw_response(self, url: str) -> str:
-        response = self.session.get(url)
-        response.raise_for_status()  # This will raise an HTTPError if the HTTP request returned an unsuccessful status code
-        print("response.text", response.text)
-        return response.text
+        try:
+            response = self.session.get(url)
+            response.raise_for_status()  # This will raise an HTTPError if the HTTP request returned an unsuccessful status code
+            print(f"Response Status Code: {response.status_code}")
+            print(f"Response Headers: {response.headers}")
+            print(f"Response Text: {response.text}")
+            return response.text
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP error occurred: {http_err}")  # HTTP error
+        except requests.exceptions.ConnectionError as conn_err:
+            print(f"Connection error occurred: {conn_err}")  # Network problem
+        except requests.exceptions.Timeout as timeout_err:
+            print(f"Timeout error occurred: {timeout_err}")  # Request timed out
+        except requests.exceptions.RequestException as req_err:
+            print(f"An error occurred: {req_err}")  # Ambiguous exception
+        return ""
 
     def extract_json_from_response(self, raw_response: str) -> dict:
         # Assuming the first character is not needed, as per your original code

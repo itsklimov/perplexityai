@@ -33,7 +33,7 @@ class Perplexity:
         self._auth_session()
 
         while not (self.ws.sock and self.ws.sock.connected):
-            sleep(0.05)
+            sleep(0.1)
 
     def _remove_email_from_session_file(self, email: str):
         # Logic to remove the email line from the .perplexity_session file
@@ -52,9 +52,11 @@ class Perplexity:
                 # After recovering, set the tokens
                 self.t = self._get_t()
                 self.sid = self._get_sid()
+                print("Initialized t and sid tokens.")
                 # Now check if the session is authenticated
                 if self._ask_anonymous_user():
                     session_recovered = True
+                    print("Session session_recovered.", session_recovered)
                 else:
                     print("Session recovered but not fully functional.")
                     self.session.cookies.clear()
@@ -69,7 +71,7 @@ class Perplexity:
             # Set the tokens after initializing a new session
             self.t = self._get_t()
             self.sid = self._get_sid()
-            print("Session cookies in not session_recovered:", self.session.cookies)
+            # print("Session cookies in not session_recovered:", self.session.cookies)
             # Ensure the new session is authenticated
             assert self._ask_anonymous_user(), "Session is not authenticated"
 
@@ -92,7 +94,7 @@ class Perplexity:
 
         # try:
         email_link: str = gmail.get_sign_in_url()
-        print("Email link received:", email_link)
+        # print("Email link received:", email_link)
         self.session.get(email_link)
 
         if ps:

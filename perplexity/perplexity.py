@@ -118,12 +118,27 @@ class Perplexity:
     def _get_t(self) -> str:
         return format(getrandbits(32), "08x")
 
+    def fetch_raw_response(self, url: str) -> str:
+        response = self.session.get(url)
+        response.raise_for_status()  # This will raise an HTTPError if the HTTP request returned an unsuccessful status code
+        print("response.text", response.text)
+        return response.text
+
+    def extract_json_from_response(self, raw_response: str) -> dict:
+        # Assuming the first character is not needed, as per your original code
+        json_str = raw_response[1:]
+        return loads(json_str)
+
+    def get_sid_from_json(self, json_data: dict) -> str:
+        return json_data["sid"]
+
     def _get_sid(self) -> str:
-        return loads(
-            self.session.get(
-                url=f"https://www.perplexity.ai/socket.io/?EIO=4&transport=polling&t={self.t}"
-            ).text[1:]
-        )["sid"]
+        url = f"https://www.perplexity.ai/socket.io/?EIO=4&transport=polling&t={self.t}"
+        raw_response = self.fetch_raw_response(url)
+        json_data = self.extract_json_from_response(raw_response)
+        sid = self.get_sid_from_json(json_data)
+        print(f"Session ID: {sid}")
+        return sid
 
     def _ask_anonymous_user(self) -> bool:
         response = self.session.post(
